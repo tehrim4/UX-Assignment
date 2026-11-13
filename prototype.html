@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Northstar Life • Asha UAT Command Center</title>
+<style>
+  :root {
+    --bg: #f8fafc;
+    --surface: #ffffff;
+    --border: #e2e8f0;
+    --text: #0f172a;
+    --muted: #64748b;
+    --primary: #2563eb;
+    --primary-hover: #1d4ed8;
+    --urgent: #dc2626;
+    --success: #16a34a;
+    --warning: #ca8a04;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+  body { background: var(--bg); color: var(--text); line-height: 1.5; }
+  
+  header {
+    background: #0f172a; color: #fff; padding: 14px 24px;
+    display: flex; justify-content: space-between; align-items: center;
+    border-bottom: 1px solid #1e293b;
+  }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .brand-badge { background: var(--primary); padding: 4px 10px; border-radius: 4px; font-weight: 700; font-size: 12px; }
+  .brand h1 { font-size: 16px; font-weight: 600; }
+  
+  nav { display: flex; gap: 8px; }
+  .nav-btn {
+    background: transparent; color: #cbd5e1; border: 1px solid transparent;
+    padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500;
+  }
+  .nav-btn:hover { background: #1e293b; color: #fff; }
+  .nav-btn.active { background: var(--primary); color: #fff; }
+
+  .screen { display: none; max-width: 1120px; margin: 24px auto; padding: 0 20px; position: relative; }
+  .screen.active { display: block; }
+  .screen-id-badge {
+    position: fixed; bottom: 16px; right: 16px; background: #0f172a; color: #38bdf8;
+    font-family: monospace; font-size: 13px; font-weight: 700; padding: 6px 12px;
+    border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 999;
+    border: 1px solid #334155;
+  }
+
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+  .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+  .card-title { font-size: 18px; font-weight: 700; }
+  .subtitle { color: var(--muted); font-size: 13px; margin-top: 2px; }
+
+  .btn {
+    padding: 8px 14px; border-radius: 6px; border: 1px solid var(--border);
+    background: #fff; color: var(--text); font-size: 13px; font-weight: 600;
+    cursor: pointer; transition: 0.15s;
+  }
+  .btn:hover { background: #f1f5f9; }
+  .btn-primary { background: var(--primary); color: #fff; border-color: var(--primary); }
+  .btn-primary:hover { background: var(--primary-hover); }
+  .btn-success { background: var(--success); color: #fff; border-color: var(--success); }
+  .btn-danger { background: var(--urgent); color: #fff; border-color: var(--urgent); }
+  .btn-sm { padding: 4px 10px; font-size: 12px; }
+
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 20px; }
+  .kpi-card { background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
+  .kpi-val { font-size: 28px; font-weight: 800; margin: 4px 0; }
+  .kpi-label { font-size: 12px; color: var(--muted); font-weight: 600; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { text-align: left; padding: 12px 10px; border-bottom: 1px solid var(--border); }
+  th { background: #f8fafc; color: var(--muted); font-weight: 600; font-size: 12px; text-transform: uppercase; }
+  tr:hover td { background: #f8fafc; }
+
+  .badge { display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
+  .badge-open { background: #fee2e2; color: #991b1b; }
+  .badge-fixed { background: #fef9c3; color: #854d0e; }
+  .badge-retested { background: #dcfce7; color: #166534; }
+
+  .transcript-line {
+    display: flex; gap: 12px; padding: 10px 12px; border-bottom: 1px solid #f1f5f9;
+    align-items: flex-start;
+  }
+  .transcript-line:hover { background: #f8fafc; }
+  .line-id { font-family: monospace; font-size: 12px; color: var(--muted); min-width: 55px; }
+  .speaker { font-weight: 700; min-width: 80px; font-size: 13px; }
+  .speaker.asha { color: var(--primary); }
+  .dialogue { flex: 1; font-size: 14px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <span class="brand-badge">NORTHSTAR LIFE</span>
+    <h1>Asha UAT Command Center</h1>
+  </div>
+  <nav>
+    <button class="nav-btn active" onclick="switchScreen('S01', this)">S01: UAT Command Dashboard</button>
+    <button class="nav-btn" onclick="switchScreen('S02', this)">S02: Test Call Review & Inspector</button>
+    <button class="nav-btn" onclick="switchScreen('S03', this)">S03: Issue Detail & Retest Gate</button>
+    <button class="nav-btn" onclick="switchScreen('S04', this)">S04: Compliance Review Queue</button>
+  </nav>
+</header>
+
+<!-- SCREEN S01: UAT COMMAND DASHBOARD -->
+<section id="S01" class="screen active">
+  <div class="kpi-grid">
+    <div class="kpi-card"><div class="kpi-label">TOTAL TEST CALLS EXECUTED</div><div class="kpi-val">156</div></div>
+    <div class="kpi-card"><div class="kpi-label">OPEN DEFECTS</div><div class="kpi-val" style="color:var(--urgent);">5</div></div>
+    <div class="kpi-card"><div class="kpi-label">PENDING RETEST (BUILD v1.2)</div><div class="kpi-val" style="color:var(--warning);">4</div></div>
+    <div class="kpi-card"><div class="kpi-label">GO-LIVE READINESS</div><div class="kpi-val" style="color:var(--success);">88%</div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <div class="card-title">Active UAT Defect Queue (US-05, US-06)</div>
+        <div class="subtitle">Unified telemetry data across Priya, Sameer, and Anjali</div>
+      </div>
+      <button class="btn btn-primary" onclick="switchScreen('S02')">+ Inspect Transcripts</button>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Issue ID</th>
+          <th>Call ID</th>
+          <th>Category</th>
+          <th>Summary</th>
+          <th>Severity</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>EV01</strong></td>
+          <td><code>UAT-0142</code></td>
+          <td>Due Date Mismatch</td>
+          <td>Asha read renewal due date as March 5th instead of May 3rd.</td>
+          <td><span class="badge" style="background:#ffedd5; color:#9a3412;">High</span></td>
+          <td><span class="badge badge-fixed">Fixed (Build v1.2)</span></td>
+          <td><button class="btn btn-sm" onclick="switchScreen('S03')">Verify Retest</button></td>
+        </tr>
+        <tr>
+          <td><strong>EV04</strong></td>
+          <td><code>UAT-0157</code></td>
+          <td>Payment Link Logic</td>
+          <td>Pushes payment link after customer stated they already paid.</td>
+          <td><span class="badge" style="background:#fee2e2; color:#991b1b;">Urgent</span></td>
+          <td><span class="badge badge-open">Open</span></td>
+          <td><button class="btn btn-sm" onclick="switchScreen('S03')">Inspect</button></td>
+        </tr>
+        <tr>
+          <td><strong>EV06</strong></td>
+          <td><code>UAT-0163</code></td>
+          <td>Callback Dispatch</td>
+          <td>Customer asked for human, callback field left blank in post-call data.</td>
+          <td><span class="badge" style="background:#fef3c7; color:#92400e;">Medium</span></td>
+          <td><span class="badge badge-open">Open</span></td>
+          <td><button class="btn btn-sm" onclick="switchScreen('S03')">Inspect</button></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="screen-id-badge">SCREEN ID: S01 (UAT Command Dashboard)</div>
+</section>
+
+<!-- SCREEN S02: TEST CALL REVIEW & TRANSCRIPT INSPECTOR -->
+<section id="S02" class="screen">
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <div class="card-title">Test Call Review & Transcript Inspector (US-01, US-07)</div>
+        <div class="subtitle">Inspect test call transcripts (T1–T3) and raise structured issues</div>
+      </div>
+      <select id="callSelect" onchange="renderTranscript()" style="padding:6px 10px; border-radius:6px; border:1px solid var(--border);">
+        <option value="UAT-0142">UAT-0142 (Arun Verma • Tester: Sameer)</option>
+        <option value="UAT-0157">UAT-0157 (Lydia Fernandes • Tester: Anjali)</option>
+      </select>
+    </div>
+
+    <div id="transcriptBox" style="border:1px solid var(--border); border-radius:6px; overflow:hidden;"></div>
+  </div>
+  <div class="screen-id-badge">SCREEN ID: S02 (Test Call Review)</div>
+</section>
+
+<!-- SCREEN S03: ISSUE DETAIL & RETEST VERIFICATION -->
+<section id="S03" class="screen">
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <div class="card-title">Issue Detail & Retest Verification View (US-02, US-03)</div>
+        <div class="subtitle">Review issue details, vendor build notes (Build v1.2), and record retest pass/fail</div>
+      </div>
+      <button class="btn" onclick="switchScreen('S01')">← Back to Dashboard</button>
+    </div>
+
+    <div style="display:grid; grid-template-columns: 2fr 1fr; gap:20px;">
+      <div>
+        <h4 style="font-size:13px; color:var(--muted); margin-bottom:6px;">DEFECT SUMMARY (Ref: EV01 / UAT-0142)</h4>
+        <p style="font-size:14px; background:#f8fafc; padding:12px; border-radius:6px; border:1px solid var(--border); margin-bottom:16px;">
+          Asha read renewal due date as March 5th instead of May 3rd (Line T1-03). Vendor Karthik S. shipped a fix in <strong>Build v1.2</strong>.
+        </p>
+
+        <h4 style="font-size:13px; color:var(--muted); margin-bottom:6px;">VENDOR BUILD NOTES (E2)</h4>
+        <p style="font-size:13px; background:#fef9c3; padding:10px; border-radius:6px; border:1px solid #fde047; margin-bottom:16px;">
+          "Fixed date-parsing format mismatch (MM/DD vs DD/MM). Please run retest on call UAT-0171." — Karthik S. (Solutions Engineer)
+        </p>
+      </div>
+
+      <div style="background:#f8fafc; border:1px solid var(--border); border-radius:8px; padding:16px;">
+        <h4 style="font-size:13px; margin-bottom:8px;">RETEST VERIFICATION GATE (US-03)</h4>
+        <p style="font-size:12px; color:var(--muted); margin-bottom:12px;">
+          Eliminates ambiguous statuses like "Fixed?". Select binary outcome:
+        </p>
+        <div style="display:grid; gap:8px;">
+          <button class="btn btn-success" onclick="alert('Retest recorded as VERIFIED PASS. Status updated to Retested.')">✓ Verified Pass</button>
+          <button class="btn btn-danger" onclick="alert('Retest recorded as REGRESSION FAIL. Issue re-opened as Urgent.')">✕ Regression Fail</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="screen-id-badge">SCREEN ID: S03 (Issue Detail & Retest View)</div>
+</section>
+
+<!-- SCREEN S04: COMPLIANCE REVIEW QUEUE -->
+<section id="S04" class="screen">
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <div class="card-title">Compliance Review Queue (US-04, US-08)</div>
+        <div class="subtitle">Review and approve/reject script modifications for regulatory compliance (Ref: E5)</div>
+      </div>
+      <span class="badge" style="background:#fef3c7; color:#92400e;">Locked Queue</span>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Request ID</th>
+          <th>Proposed Wording Change</th>
+          <th>Submitted By</th>
+          <th>Compliance Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>CR-01</strong></td>
+          <td>Update grace period disclosure from 30 days to 15 days for specific high-risk policies.</td>
+          <td>Rahul Mehta (Sponsor)</td>
+          <td><span class="badge" style="background:#fef3c7; color:#92400e;">Pending Review</span></td>
+          <td>
+            <button class="btn btn-sm btn-success" onclick="alert('Wording change APPROVED by Compliance.')">Approve</button>
+            <button class="btn btn-sm btn-danger" onclick="alert('Wording change REJECTED. Sent back for revision.')">Reject</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="screen-id-badge">SCREEN ID: S04 (Compliance Review Queue)</div>
+</section>
+
+<script>
+  function switchScreen(screenId, btnEl) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(screenId).classList.add('active');
+    if (btnEl) {
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+      btnEl.classList.add('active');
+    }
+    if (screenId === 'S02') renderTranscript();
+  }
+
+  function renderTranscript() {
+    const callId = document.getElementById('callSelect').value;
+    const box = document.getElementById('transcriptBox');
+    
+    const lines = callId === 'UAT-0142' ? [
+      { id: 'T1-01', speaker: 'Asha', text: 'Good morning, am I speaking with Mr. Arun Verma?' },
+      { id: 'T1-02', speaker: 'Customer', text: 'Yes, speaking.' },
+      { id: 'T1-03', speaker: 'Asha', text: 'This is Asha calling from Northstar Life Insurance. Your renewal premium of ₹24,500 is due on March 5th.' },
+      { id: 'T1-04', speaker: 'Customer', text: 'March? I thought it was May.' }
+    ] : [
+      { id: 'T2-03', speaker: 'Asha', text: 'Your renewal premium of ₹18,200 for policy ending 2290 is due on 20th November.' },
+      { id: 'T2-04', speaker: 'Customer', text: 'I paid it yesterday on your app.' },
+      { id: 'T2-05', speaker: 'Asha', text: 'Thank you. To avoid lapse, I can send you a secure payment link right now.' }
+    ];
+
+    box.innerHTML = lines.map(l => `
+      <div class="transcript-line">
+        <div class="line-id">${l.id}</div>
+        <div class="speaker ${l.speaker === 'Asha' ? 'asha' : ''}">${l.speaker}</div>
+        <div class="dialogue">${l.text}</div>
+        <button class="btn btn-sm" onclick="alert('Issue raised for line ${l.id}!')">Raise Issue</button>
+      </div>
+    `).join('');
+  }
+
+  renderTranscript();
+</script>
+</body>
+</html>
